@@ -1,9 +1,14 @@
 const express = require("express");
+const cors = require("cors");
+
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
 const app = express();
 app.use(express.json());
+
+// Add this after creating the express app
+app.use(cors());
 
 // Initialize Supabase client
 const supabase = createClient(
@@ -85,6 +90,24 @@ app.get("/dialog", async (req, res) => {
     query = query.order("timestamp", { ascending: false });
 
     const { data, error } = await query;
+
+    if (error) throw error;
+
+    res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.get("/humans", async (req, res) => {
+  try {
+    const { data, error } = await supabase.from("humans").select("*");
 
     if (error) throw error;
 
